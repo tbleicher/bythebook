@@ -1,0 +1,32 @@
+[package]
+name = "adapter_sql"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "adapter_sql"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+nanoid = "0.4.0"
+
+domain = { path = "../domain" }
+
+[dependencies.sea-orm]
+version = "^0.10.2" # sea-orm version
+features = [
+  "debug-print",
+  "runtime-async-std-native-tls",
+  # "sqlx-postgres",
+  # "sqlx-mysql",
+  "sqlx-sqlite",
+]
+
+[features]
+mock = ["sea-orm/mock"]
+
+[[test]]
+name = "mock"
+required-features = ["mock"]
