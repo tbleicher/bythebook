@@ -35,6 +35,8 @@ pub struct Organisation {
     pub id: String,
     pub name: String,
     pub admin_id: String,
+    pub active: bool,
+    pub deleted: bool,
 }
 
 impl Organisation {
@@ -42,7 +44,9 @@ impl Organisation {
         Organisation {
             id: entity.id.clone(),
             name: entity.name.clone(),
+            active: entity.active.clone(),
             admin_id: entity.admin_id.clone(),
+            deleted: entity.deleted.clone(),
         }
     }
 }
@@ -55,6 +59,10 @@ impl Organisation {
 
     async fn name(&self) -> String {
         self.name.to_string()
+    }
+
+    async fn active(&self) -> bool {
+        self.active.to_owned()
     }
 
     async fn admin(&self, ctx: &Context<'_>) -> Result<User, ResolverError> {
@@ -72,5 +80,9 @@ impl Organisation {
             Ok(Some(user)) => Ok(User::from_entity(&user)),
             _ => Err(ResolverError::new("organisation admin not found")),
         }
+    }
+
+    async fn deleted(&self) -> bool {
+        self.deleted.to_owned()
     }
 }

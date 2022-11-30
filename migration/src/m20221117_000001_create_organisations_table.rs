@@ -17,6 +17,16 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .primary_key(),
                     )
+                    .col(
+                        ColumnDef::new(Organisations::Active)
+                            .boolean()
+                            .default(false),
+                    )
+                    .col(
+                        ColumnDef::new(Organisations::Deleted)
+                            .boolean()
+                            .default(false),
+                    )
                     .col(ColumnDef::new(Organisations::Name).string().not_null())
                     .col(ColumnDef::new(Organisations::AdminId).string().not_null())
                     .to_owned(),
@@ -35,6 +45,8 @@ impl MigrationTrait for Migration {
 pub enum Organisations {
     Table,
     Id,
+    Active,
     AdminId,
+    Deleted,
     Name,
 }

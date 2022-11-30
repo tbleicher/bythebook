@@ -7,7 +7,9 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
     pub name: String,
+    pub active: bool,
     pub admin_id: String,
+    pub deleted: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -21,13 +23,9 @@ impl Entity {
     }
 
     pub fn delete_by_id(id: String) -> DeleteMany<Entity> {
-        Self::delete_many().filter(Column::Id.eq(id))
+        // only delete entries that are already marked as 'deleted'
+        Self::delete_many()
+            .filter(Column::Id.eq(id))
+            .filter(Column::Deleted.eq(true))
     }
-}
-
-#[derive(Clone, Debug)]
-pub struct NewUserDTO {
-    pub email: String,
-    pub name: String,
-    pub organisation_id: String,
 }

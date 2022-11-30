@@ -26,7 +26,9 @@ pub struct DeleteUserResult {
 pub struct User {
     pub id: String,
     pub name: String,
+    pub deleted: bool,
     pub email: String,
+    pub email_verified: bool,
     pub organisation_id: String,
 }
 
@@ -34,7 +36,9 @@ impl User {
     pub fn from_entity(entity: &UserEntity) -> User {
         User {
             id: entity.id.clone(),
+            deleted: entity.deleted.clone(),
             email: entity.email.clone(),
+            email_verified: entity.email_verified.clone(),
             name: entity.name.clone(),
             organisation_id: entity.organisation_id.clone(),
         }
@@ -47,9 +51,18 @@ impl User {
         self.id.to_string()
     }
 
+    async fn deleted(&self) -> bool {
+        self.deleted.to_owned()
+    }
+
     async fn email(&self) -> String {
         self.email.to_string()
     }
+
+    async fn email_verified(&self) -> bool {
+        self.email_verified.to_owned()
+    }
+
     async fn name(&self) -> String {
         self.name.to_string()
     }

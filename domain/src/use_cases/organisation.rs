@@ -15,7 +15,7 @@ impl OrganisationUseCases {
         user_repo: impl UserRepository,
         dto: NewOrganisationDTO,
     ) -> Result<Organisation, RepositoryError> {
-        let create_org_result = repo.create(dto.name, "temporary_id".to_string()).await;
+        let create_org_result = repo.create(dto.name, "tmp_admin_id".to_string()).await;
         let org_tmp = match create_org_result {
             Ok(org) => org,
             Err(error) => return Err(RepositoryError::new(&error.to_string())),
@@ -35,10 +35,13 @@ impl OrganisationUseCases {
             }
         };
 
+        // TODO: active org only after admin email verification
         let org_updated = Organisation {
             id: org_tmp.id.clone(),
             name: org_tmp.name,
+            active: true,
             admin_id: admin.id.clone(),
+            deleted: false,
         };
         let update_org_result = repo.update(org_updated).await;
         match update_org_result {

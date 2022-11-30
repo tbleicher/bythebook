@@ -23,8 +23,12 @@ async fn test_create_organisation() {
         "data": {
             "createOrganisation": {
                 "name": "Example Inc",
+                "active": true,
+                "deleted": false,
                 "admin": {
+                    "deleted": false,
                     "email": "admin@example.com",
+                    "emailVerified": true,
                     "name": "Admin User",
                 }
 
@@ -49,7 +53,12 @@ async fn test_delete_organisation() {
     let expected = json!({
         "data": {
             "deleteOrganisation": {
-                "name": "ACME"
+                "name": "ACME",
+                "active": false,
+                "deleted": true,
+                "admin": {
+                    "deleted": true,
+                }
             }
         }
     });

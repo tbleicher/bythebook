@@ -13,7 +13,9 @@ use super::execute_query;
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct User {
+    pub deleted: bool,
     pub email: String,
+    pub emailVerified: bool,
     pub name: String,
 }
 
@@ -21,13 +23,9 @@ pub struct User {
 pub struct Organisation {
     pub id: String,
     pub name: String,
+    pub active: bool,
+    pub deleted: bool,
     pub admin: User,
-}
-
-#[derive(Deserialize, Debug, Serialize)]
-pub struct OrganisationDeleted {
-    pub id: String,
-    pub name: String,
 }
 
 #[derive(Deserialize, Debug, Serialize)]
@@ -42,7 +40,7 @@ pub struct CreateOrganisationResponse {
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct DeleteOrganisationData {
-    pub deleteOrganisation: OrganisationDeleted,
+    pub deleteOrganisation: Organisation,
 }
 
 #[derive(Deserialize, Debug, Serialize)]
@@ -79,14 +77,14 @@ impl OrganisationFixture {
 
 pub fn get_create_organisation_query(name: &str, admin_email: &str, admin_name: &str) -> String {
     format!(
-        r#"mutation {{ createOrganisation(input: {{ name: {:?}, adminEmail: {:?}, adminName: {:?} }}) {{ id name admin {{ name email }} }} }}"#,
+        r#"mutation {{ createOrganisation(input: {{ name: {:?}, adminEmail: {:?}, adminName: {:?} }}) {{ id name active deleted admin {{ name email emailVerified deleted }} }} }}"#,
         name, admin_email, admin_name
     )
 }
 
 pub fn get_delete_organisation_query(id: &str) -> String {
     format!(
-        r#"mutation {{ deleteOrganisation(id: {:?}) {{ id name }} }}"#,
+        r#"mutation {{ deleteOrganisation(id: {:?}) {{ id name active deleted admin {{ name email emailVerified deleted }} }} }}"#,
         id
     )
 }

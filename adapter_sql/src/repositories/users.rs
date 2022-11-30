@@ -5,12 +5,15 @@ use domain::errors::RepositoryError;
 use domain::interfaces::UserRepository;
 
 use nanoid::nanoid;
+use sea_orm::sea_query::Expr;
 use sea_orm::*;
 
 fn convert_to_entity(model: user::Model) -> User {
     User {
         id: model.id.to_string(),
+        deleted: model.deleted.to_owned(),
         email: model.email.to_string(),
+        email_verified: model.email_verified.to_owned(),
         name: model.name.to_string(),
         organisation_id: model.organisation_id.to_string(),
     }
@@ -24,7 +27,9 @@ impl UserRepository for UserRepositorySql<'_> {
     async fn create(&self, dto: NewUserDTO) -> Result<User, RepositoryError> {
         let new_user = user::ActiveModel {
             id: Set(nanoid!(10, &nanoid::alphabet::SAFE)),
+            deleted: Set(false),
             email: Set(dto.email.to_owned()),
+            email_verified: Set(true), // TODO: create 'false' and implement verification
             name: Set(dto.name.to_owned()),
             organisation_id: Set(dto.organisation_id.to_owned()),
         };
@@ -57,12 +62,13 @@ impl UserRepository for UserRepositorySql<'_> {
     }
 
     async fn delete_by_organisation_id(&self, id: String) -> Result<(), RepositoryError> {
-        let delete_result = user::Entity::delete_many()
+        let update_result = user::Entity::update_many()
+            .col_expr(user::Column::Deleted, Expr::value(true))
             .filter(user::Column::OrganisationId.eq(id))
             .exec(self.db)
             .await;
 
-        match delete_result {
+        match update_result {
             Err(error) => Err(RepositoryError::new(&format!("DB error: {:?}", error))),
             Ok(_) => Ok(()),
         }
@@ -123,7 +129,9 @@ impl UserRepository for UserRepositorySql<'_> {
 
         let update_result = user::ActiveModel {
             id: Set(user.id),
+            deleted: Set(data.deleted),
             email: Set(data.email.to_owned()),
+            email_verified: Set(data.email_verified),
             name: Set(data.name.to_owned()),
             organisation_id: Set(data.organisation_id.to_owned()),
         }

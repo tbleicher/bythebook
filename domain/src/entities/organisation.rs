@@ -1,8 +1,10 @@
 #[derive(Clone, Debug)]
 pub struct Organisation {
     pub id: String,
+    pub active: bool,
     pub admin_id: String,
     pub name: String,
+    pub deleted: bool,
 }
 
 #[derive(Clone, Debug)]

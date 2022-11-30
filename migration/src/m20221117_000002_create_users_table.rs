@@ -20,6 +20,12 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .unique_key(),
                     )
+                    .col(
+                        ColumnDef::new(Users::EmailVerified)
+                            .boolean()
+                            .default(false),
+                    )
+                    .col(ColumnDef::new(Users::Deleted).boolean().default(false))
                     .col(ColumnDef::new(Users::Name).string().not_null())
                     .col(ColumnDef::new(Users::OrganisationId).string().not_null())
                     .foreign_key(
@@ -44,7 +50,9 @@ impl MigrationTrait for Migration {
 enum Users {
     Table,
     Id,
+    Deleted,
     Email,
+    EmailVerified,
     Name,
     OrganisationId,
 }
