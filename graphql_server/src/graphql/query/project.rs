@@ -1,6 +1,5 @@
-use crate::db::Database;
 use crate::graphql::types::Project;
-use adapter_sql::repositories::ProjectRepositorySql;
+use crate::repo_provider::RepoProviderGraphql;
 use async_graphql::Error;
 use async_graphql::{Context, Object, Result};
 use domain::use_cases::ProjectUseCases;
@@ -11,12 +10,9 @@ pub struct ProjectsQuery;
 #[Object]
 impl ProjectsQuery {
     async fn projects(&self, ctx: &Context<'_>) -> Result<Vec<Project>> {
-        let db = ctx.data::<Database>().unwrap();
-        let repo = ProjectRepositorySql {
-            db: db.get_connection(),
-        };
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
 
-        let list_result = ProjectUseCases::list_projects(repo).await;
+        let list_result = ProjectUseCases::list_projects(repo_provider).await;
 
         match list_result {
             Ok(entities) => {
@@ -28,12 +24,9 @@ impl ProjectsQuery {
     }
 
     async fn project(&self, ctx: &Context<'_>, id: String) -> Result<Option<Project>> {
-        let db = ctx.data::<Database>().unwrap();
-        let repo = ProjectRepositorySql {
-            db: db.get_connection(),
-        };
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
 
-        let search_result = ProjectUseCases::get_project_by_id(repo, id).await;
+        let search_result = ProjectUseCases::get_project_by_id(repo_provider, id).await;
 
         let option = match search_result {
             Ok(option) => option,

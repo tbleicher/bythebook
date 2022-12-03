@@ -1,5 +1,6 @@
 pub mod db;
 pub mod graphql;
+pub mod repo_provider;
 
 use actix_web::{guard, web, web::Data, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::GraphiQLSource;
@@ -12,6 +13,8 @@ use migration::{Migrator, MigratorTrait};
 
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
+
+use crate::repo_provider::RepoProviderGraphql;
 
 pub async fn index_graphql(schema: web::Data<AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
@@ -36,7 +39,8 @@ pub async fn main() -> std::io::Result<()> {
     let db = Database::new(db_url).await;
     Migrator::up(db.get_connection(), None).await.unwrap();
 
-    let schema = build_schema(db).await;
+    let repo_provider = RepoProviderGraphql { db };
+    let schema = build_schema(repo_provider).await;
 
     println!("GraphiQL IDE: http://localhost:8000");
 

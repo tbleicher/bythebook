@@ -1,13 +1,12 @@
-use adapter_sql::repositories::UserRepositorySql;
 use async_graphql::{Context, InputObject, Object, SimpleObject};
 use domain::{
     entities::organisation::NewOrganisationDTO,
-    entities::organisation::Organisation as OrganisationEntity, interfaces::UserRepository,
+    entities::organisation::Organisation as OrganisationEntity, interfaces::RepoProvider,
 };
 
 use super::errors::ResolverError;
 use super::User;
-use crate::db::Database;
+use crate::repo_provider::RepoProviderGraphql;
 
 #[derive(InputObject)]
 pub struct CreateOrganisationInput {
@@ -66,10 +65,8 @@ impl Organisation {
     }
 
     async fn admin(&self, ctx: &Context<'_>) -> Result<User, ResolverError> {
-        let db = ctx.data::<Database>().unwrap();
-        let conn = db.get_connection();
-
-        let repo = UserRepositorySql { db: conn };
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
+        let repo = repo_provider.get_user_repo();
 
         let option = repo
             .find_one_by_id(self.admin_id.clone())

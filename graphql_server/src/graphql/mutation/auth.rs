@@ -1,10 +1,9 @@
-use adapter_sql::repositories::UserRepositorySql;
 use async_graphql::{self, Context, Error, Object, Result};
 use domain::use_cases::UserUseCases;
 
 use crate::{
-    db::Database,
     graphql::types::{CreateUserInput, DeleteUserResult, User},
+    repo_provider::RepoProviderGraphql,
 };
 
 #[derive(Default)]
@@ -13,12 +12,8 @@ pub struct AuthMutation;
 #[Object]
 impl AuthMutation {
     pub async fn create_user(&self, ctx: &Context<'_>, input: CreateUserInput) -> Result<User> {
-        let db = ctx.data::<Database>().unwrap();
-        let repo = UserRepositorySql {
-            db: db.get_connection(),
-        };
-
-        let result = UserUseCases::create_user(repo, input.into_dto()).await;
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
+        let result = UserUseCases::create_user(repo_provider, input.into_dto()).await;
 
         match result {
             Ok(entity) => Ok(User::from_entity(&entity)),
@@ -27,12 +22,8 @@ impl AuthMutation {
     }
 
     pub async fn delete_user(&self, ctx: &Context<'_>, id: String) -> Result<DeleteUserResult> {
-        let db = ctx.data::<Database>().unwrap();
-        let repo = UserRepositorySql {
-            db: db.get_connection(),
-        };
-
-        let result = UserUseCases::delete_user(repo, id).await;
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
+        let result = UserUseCases::delete_user(repo_provider, id).await;
 
         match result {
             Ok(entity) => Ok(DeleteUserResult {

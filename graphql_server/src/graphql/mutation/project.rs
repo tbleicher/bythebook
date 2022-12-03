@@ -1,10 +1,9 @@
-use adapter_sql::repositories::ProjectRepositorySql;
 use async_graphql::{self, Context, Error, Object, Result};
 use domain::use_cases::ProjectUseCases;
 
 use crate::{
-    db::Database,
     graphql::types::{CreateProjectInput, Project},
+    repo_provider::RepoProviderGraphql,
 };
 
 #[derive(Default)]
@@ -17,12 +16,9 @@ impl ProjectsMutation {
         ctx: &Context<'_>,
         input: CreateProjectInput,
     ) -> Result<Project> {
-        let db = ctx.data::<Database>().unwrap();
-        let repo = ProjectRepositorySql {
-            db: db.get_connection(),
-        };
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
 
-        let result = ProjectUseCases::create_project(repo, input.into_dto()).await;
+        let result = ProjectUseCases::create_project(repo_provider, input.into_dto()).await;
 
         match result {
             Ok(entity) => Ok(Project::from_entity(&entity)),
@@ -31,12 +27,9 @@ impl ProjectsMutation {
     }
 
     pub async fn delete_project(&self, ctx: &Context<'_>, id: String) -> Result<Project> {
-        let db = ctx.data::<Database>().unwrap();
-        let repo = ProjectRepositorySql {
-            db: db.get_connection(),
-        };
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
 
-        let result = ProjectUseCases::delete_project(repo, id).await;
+        let result = ProjectUseCases::delete_project(repo_provider, id).await;
 
         match result {
             Ok(entity) => Ok(Project::from_entity(&entity)),

@@ -1,34 +1,37 @@
 use crate::{
     entities::note::{NewNoteDTO, Note},
     errors::RepositoryError,
-    interfaces::NoteRepository,
+    interfaces::RepoProvider,
 };
 
 pub struct NoteUseCases {}
 
 impl NoteUseCases {
     pub async fn create_note(
-        repo: impl NoteRepository,
+        repo_provider: &impl RepoProvider,
         dto: NewNoteDTO,
     ) -> Result<Note, RepositoryError> {
+        let repo = repo_provider.get_note_repo();
         let result = repo.create(dto).await;
 
         result
     }
 
     pub async fn delete_note(
-        repo: impl NoteRepository,
+        repo_provider: &impl RepoProvider,
         id: String,
     ) -> Result<Note, RepositoryError> {
+        let repo = repo_provider.get_note_repo();
         let result = repo.delete_by_id(id).await;
 
         result
     }
 
     pub async fn get_note_by_id(
-        repo: impl NoteRepository,
+        repo_provider: &impl RepoProvider,
         note_id: String,
     ) -> Result<Option<Note>, RepositoryError> {
+        let repo = repo_provider.get_note_repo();
         let search_result = repo.find_one_by_id(note_id).await;
 
         let option = match search_result {
@@ -44,7 +47,10 @@ impl NoteUseCases {
         Ok(Some(note))
     }
 
-    pub async fn list_notes(repo: impl NoteRepository) -> Result<Vec<Note>, RepositoryError> {
+    pub async fn list_notes(
+        repo_provider: &impl RepoProvider,
+    ) -> Result<Vec<Note>, RepositoryError> {
+        let repo = repo_provider.get_note_repo();
         let list_result = repo.list().await;
 
         let notes = match list_result {

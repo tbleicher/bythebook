@@ -1,10 +1,9 @@
 use async_graphql::{Context, InputObject, Object, SimpleObject};
 use domain::entities::project::{NewProjectDTO, Project as ProjectEntity};
+use domain::interfaces::RepoProvider;
 
 use super::{errors::ResolverError, Note};
-use crate::db::Database;
-use adapter_sql::repositories::NoteRepositorySql;
-use domain::interfaces::NoteRepository;
+use crate::repo_provider::RepoProviderGraphql;
 
 #[derive(InputObject)]
 pub struct CreateProjectInput {
@@ -65,10 +64,8 @@ impl Project {
     }
 
     async fn notes(&self, ctx: &Context<'_>) -> Result<Vec<Note>, ResolverError> {
-        let db = ctx.data::<Database>().unwrap();
-        let repo = NoteRepositorySql {
-            db: db.get_connection(),
-        };
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
+        let repo = repo_provider.get_note_repo();
 
         let result = repo.find_by_project_id(self.id.to_owned()).await;
 

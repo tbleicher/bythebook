@@ -6,9 +6,9 @@ use actix_web::{
     web::Data,
     App, Error,
 };
-use graphql_server::db::Database;
 use graphql_server::graphql::schema::{build_schema, AppSchema};
 use graphql_server::index_graphql;
+use graphql_server::{db::Database, repo_provider::RepoProviderGraphql};
 use migration::{Migrator, MigratorTrait};
 use serde::{Deserialize, Serialize};
 
@@ -51,15 +51,10 @@ pub async fn get_test_app() -> impl Service<Request, Response = ServiceResponse,
     app
 }
 
-// #[cfg(debug_assertions)]
-// use dotenvy::dotenv;
-
 pub async fn get_graphql_schema() -> AppSchema {
-    // #[cfg(debug_assertions)]
-    // dotenv().ok();
-
     let db = Database::new("sqlite::memory:".to_owned()).await;
     Migrator::up(db.get_connection(), None).await.unwrap();
 
-    build_schema(db).await
+    let repo_provider = RepoProviderGraphql { db };
+    build_schema(repo_provider).await
 }

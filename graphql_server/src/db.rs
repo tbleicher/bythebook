@@ -1,5 +1,6 @@
 use adapter_sql::sea_orm::DatabaseConnection;
 
+#[derive(Debug)]
 pub struct Database {
     pub connection: DatabaseConnection,
 }

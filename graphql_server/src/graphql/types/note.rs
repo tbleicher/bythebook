@@ -1,11 +1,10 @@
-use adapter_sql::repositories::ProjectRepositorySql;
 use async_graphql::{Context, InputObject, Object, SimpleObject};
 use domain::{
-    entities::note::NewNoteDTO, entities::note::Note as NoteEntity, interfaces::ProjectRepository,
+    entities::note::NewNoteDTO, entities::note::Note as NoteEntity, interfaces::RepoProvider,
 };
 
 use super::{errors::ResolverError, Project};
-use crate::db::Database;
+use crate::repo_provider::RepoProviderGraphql;
 
 #[derive(InputObject)]
 pub struct CreateNoteInput {
@@ -66,20 +65,26 @@ impl Note {
     }
 
     async fn project(&self, ctx: &Context<'_>) -> Result<Project, ResolverError> {
-        let db = ctx.data::<Database>().unwrap();
-        let conn = db.get_connection();
+        let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
+        let repo = repo_provider.get_project_repo();
 
-        let repo = ProjectRepositorySql { db: conn };
+        let result = repo.find_one_by_id(self.project_id.clone()).await;
 
-        let option = repo
-            .find_one_by_id(self.project_id.clone())
-            .await
-            .map_err(|e| e.to_string());
+        let option = match result {
+            Ok(option) => option,
+            Err(error) => return Err(ResolverError::new(&error.to_string())),
+        };
 
         match option {
-            Ok(Some(pr)) => Ok(Project::from_entity(&pr)),
-            _ => Err(ResolverError::new("parent project not found")),
+            Some(pr) => Ok(Project::from_entity(&pr)),
+            None => Err(ResolverError::new("parent project not found")),
         }
+
+        // let fut = match o.recv() {
+        //     Ok(idx) => printer(idx),
+        //     Err(_) => break,
+        // };
+        // fut.await;
     }
 
     async fn organisation_id(&self) -> String {
