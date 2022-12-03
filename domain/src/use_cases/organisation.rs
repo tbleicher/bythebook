@@ -45,6 +45,7 @@ impl OrganisationUseCases {
             name: org_tmp.name,
             active: true,
             admin_id: admin.id.clone(),
+            created_at: org_tmp.created_at,
             deleted: false,
         };
         let update_org_result = repo.update(org_updated).await;

@@ -1,4 +1,5 @@
 use async_graphql::{Context, InputObject, Object, SimpleObject};
+use chrono::prelude::*;
 use domain::{
     entities::organisation::NewOrganisationDTO,
     entities::organisation::Organisation as OrganisationEntity, interfaces::RepoProvider,
@@ -35,6 +36,7 @@ pub struct Organisation {
     pub name: String,
     pub admin_id: String,
     pub active: bool,
+    pub created_at: DateTime<Utc>,
     pub deleted: bool,
 }
 
@@ -45,6 +47,7 @@ impl Organisation {
             name: entity.name.clone(),
             active: entity.active.clone(),
             admin_id: entity.admin_id.clone(),
+            created_at: entity.created_at.clone(),
             deleted: entity.deleted.clone(),
         }
     }
@@ -58,6 +61,10 @@ impl Organisation {
 
     async fn name(&self) -> String {
         self.name.to_string()
+    }
+
+    async fn created_at(&self) -> String {
+        self.created_at.to_rfc3339()
     }
 
     async fn active(&self) -> bool {

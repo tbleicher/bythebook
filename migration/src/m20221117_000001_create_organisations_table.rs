@@ -29,6 +29,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Organisations::Name).string().not_null())
                     .col(ColumnDef::new(Organisations::AdminId).string().not_null())
+                    .col(ColumnDef::new(Organisations::CreatedAt).string().not_null())
                     .to_owned(),
             )
             .await
@@ -47,6 +48,7 @@ pub enum Organisations {
     Id,
     Active,
     AdminId,
+    CreatedAt,
     Deleted,
     Name,
 }

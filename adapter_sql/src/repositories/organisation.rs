@@ -4,6 +4,7 @@ use domain::entities::organisation::Organisation;
 use domain::errors::RepositoryError;
 use domain::interfaces::OrganisationRepository;
 
+use chrono::prelude::*;
 use nanoid::nanoid;
 use sea_orm::*;
 
@@ -13,6 +14,7 @@ fn convert_to_entity(model: organisation::Model) -> Organisation {
         name: model.name.to_string(),
         active: model.active.to_owned(),
         admin_id: model.admin_id.to_string(),
+        created_at: model.created_at.clone(),
         deleted: model.deleted.to_owned(),
     }
 }
@@ -32,6 +34,7 @@ impl OrganisationRepository for OrganisationRepositorySql<'_> {
             active: Set(false),
             admin_id: Set(admin_id.to_owned()),
             deleted: Set(false),
+            created_at: Set(Utc::now()),
             name: Set(name.to_owned()),
         };
 
@@ -59,6 +62,7 @@ impl OrganisationRepository for OrganisationRepositorySql<'_> {
             name: Set(org.name.to_owned()),
             active: Set(false),
             admin_id: Set(org.admin_id.to_owned()),
+            created_at: Set(org.created_at),
             deleted: Set(true),
         }
         .update(self.db)
@@ -111,6 +115,7 @@ impl OrganisationRepository for OrganisationRepositorySql<'_> {
             name: Set(data.name.to_owned()),
             active: Set(data.active.to_owned()),
             admin_id: Set(data.admin_id.to_owned()),
+            created_at: Set(data.created_at.to_owned()),
             deleted: Set(data.deleted.to_owned()),
         }
         .update(self.db)

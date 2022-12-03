@@ -10,6 +10,7 @@ pub struct Model {
     pub active: bool,
     pub admin_id: String,
     pub deleted: bool,
+    pub created_at: ChronoDateTimeUtc,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

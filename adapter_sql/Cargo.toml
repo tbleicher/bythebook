@@ -9,6 +9,7 @@ name = "adapter_sql"
 path = "src/lib.rs"
 
 [dependencies]
+chrono = "0.4.23"
 serde = { version = "1", features = ["derive"] }
 nanoid = "0.4.0"
 
