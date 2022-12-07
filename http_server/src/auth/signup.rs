@@ -1,8 +1,8 @@
-use crate::repo_provider::RepoProviderGraphql;
 use actix_web::web::{Data, Json};
 use actix_web::{HttpResponse, Responder};
 use domain::entities::user::NewUserDTO;
 use domain::use_cases::UserUseCases;
+use graphql_schema::repo_provider::RepoProviderGraphql;
 
 use serde::{Deserialize, Serialize};
 

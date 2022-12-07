@@ -6,7 +6,7 @@ use domain::{
     },
     interfaces::RepoProvider,
 };
-use graphql_server::auth::password::hash_password;
+use http_server::auth::password::hash_password;
 use nanoid::nanoid;
 
 pub async fn seed_database(repo_provider: &impl RepoProvider, hashing_secret: String) {

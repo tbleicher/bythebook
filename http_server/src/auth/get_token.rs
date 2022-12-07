@@ -1,28 +1,31 @@
 use crate::auth::token::generate_user_token;
 use crate::config::AppConfig;
-use crate::repo_provider::RepoProviderGraphql;
-use actix_web::web::Data;
+use actix_web::web::{Data, Json};
 use actix_web::{HttpResponse, Responder};
-use actix_web_httpauth::extractors::basic::BasicAuth;
-
 use domain::use_cases::UserUseCases;
+use graphql_schema::repo_provider::RepoProviderGraphql;
+use serde::{Deserialize, Serialize};
 
 use super::password::verify_password;
 
-pub async fn signin(
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetTokenRequest {
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct TokenResponse {
+    token: String,
+}
+
+pub async fn get_token(
     repo_provider: Data<RepoProviderGraphql>,
     config: Data<AppConfig>,
-    credentials: BasicAuth,
+    item: Json<GetTokenRequest>,
 ) -> impl Responder {
-    let pw_option = credentials.password();
-    let password = match pw_option {
-        None => return HttpResponse::Unauthorized().json("Must provide username and password"),
-        Some(password) => password,
-    };
-
     let user_result =
-        UserUseCases::get_auth_user(repo_provider.get_ref(), credentials.user_id().to_string())
-            .await;
+        UserUseCases::get_auth_user(repo_provider.get_ref(), item.email.to_string()).await;
 
     let user = match user_result {
         Ok(user) => user,
@@ -30,14 +33,14 @@ pub async fn signin(
     };
 
     let is_valid = verify_password(
-        &password,
+        &item.password,
         &user.password_hash,
         config.password_hashing_secret.to_string(),
     );
 
     if is_valid {
-        let token_str = generate_user_token(user, config.jwt_signing_secret.to_string());
-        HttpResponse::Ok().json(token_str)
+        let token = generate_user_token(user, config.jwt_signing_secret.to_string());
+        HttpResponse::Ok().json(TokenResponse { token })
     } else {
         HttpResponse::Unauthorized().json("Incorrect username or password")
     }

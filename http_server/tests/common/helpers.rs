@@ -8,13 +8,11 @@ use actix_web::{
     web::Data,
     App, Error,
 };
-use graphql_server::index_graphql;
-use graphql_server::{auth::get_token::get_token, config::AppConfig as TestAppConfig};
-use graphql_server::{
-    auth::signin::signin,
-    graphql::schema::{build_schema, AppSchema},
-};
-use graphql_server::{db::Database, repo_provider::RepoProviderGraphql};
+use graphql_schema::graphql::{build_schema, AppSchema};
+use graphql_schema::{db::Database, repo_provider::RepoProviderGraphql};
+use http_server::auth::signin::signin;
+use http_server::index_graphql;
+use http_server::{auth::get_token::get_token, config::AppConfig as TestAppConfig};
 use migration::{Migrator, MigratorTrait};
 use serde::{Deserialize, Serialize};
 

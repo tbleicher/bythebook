@@ -1,5 +1,6 @@
 use actix_web::{body::to_bytes, http::header::ContentType, test, web, web::Data, App};
-use graphql_server::index_graphiql;
+use graphql_schema::graphql::AppSchema;
+use http_server::index_graphiql;
 
 use crate::common::{execute_query, get_graphql_schema, get_test_app_graphql, get_test_config};
 mod common;
@@ -7,7 +8,7 @@ mod common;
 #[actix_web::test]
 async fn test_graphiql_route() {
     let config = get_test_config();
-    let schema = get_graphql_schema(&config).await;
+    let schema: AppSchema = get_graphql_schema(&config).await;
     let app = test::init_service(
         App::new()
             .app_data(Data::new(schema.clone()))

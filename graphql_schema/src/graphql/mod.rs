@@ -1,3 +1,7 @@
+pub mod mutation;
+pub mod query;
+pub mod types;
+
 use async_graphql::{EmptySubscription, Schema};
 
 use crate::{

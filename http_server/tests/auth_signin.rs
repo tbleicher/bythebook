@@ -1,4 +1,4 @@
-use graphql_server::auth::get_token::GetTokenRequest;
+use http_server::auth::get_token::GetTokenRequest;
 use serde::{Deserialize, Serialize};
 mod common;
 use common::get_test_app_rest;
