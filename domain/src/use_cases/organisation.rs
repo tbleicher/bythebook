@@ -6,6 +6,8 @@ use crate::{
     errors::RepositoryError,
     interfaces::RepoProvider,
 };
+use chrono::Utc;
+use nanoid::nanoid;
 
 use super::UserUseCases;
 
@@ -18,7 +20,16 @@ impl OrganisationUseCases {
     ) -> Result<Organisation, RepositoryError> {
         let repo = repo_provider.get_organisation_repo();
 
-        let create_org_result = repo.create(dto.name, "tmp_admin_id".to_string()).await;
+        let create_org_result = repo
+            .create(Organisation {
+                id: nanoid!(10, &nanoid::alphabet::SAFE),
+                name: dto.name,
+                active: false,
+                admin_id: "temporary".to_string(),
+                created_at: Utc::now(),
+                deleted: false,
+            })
+            .await;
         let org_tmp = match create_org_result {
             Ok(org) => org,
             Err(error) => return Err(RepositoryError::new(&error.to_string())),
@@ -39,21 +50,21 @@ impl OrganisationUseCases {
             }
         };
 
-        // TODO: active org only after admin email verification
         let org_updated = Organisation {
             id: org_tmp.id.clone(),
             name: org_tmp.name,
-            active: true,
+            active: false,
             admin_id: admin.id.clone(),
             created_at: org_tmp.created_at,
             deleted: false,
         };
         let update_org_result = repo.update(org_updated).await;
+
         match update_org_result {
             Ok(org) => Ok(org),
             Err(error) => {
-                let _delete = repo.delete_by_id(org_tmp.id).await;
                 let _delete_user = UserUseCases::delete_user(repo_provider, admin.id).await;
+                let _delete = repo.delete_by_id(org_tmp.id).await;
                 Err(RepositoryError::new(&error.to_string()))
             }
         }

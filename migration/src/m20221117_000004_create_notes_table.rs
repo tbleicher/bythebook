@@ -1,7 +1,5 @@
 use sea_orm_migration::prelude::*;
 
-use super::m20221117_000003_create_projects_table::Projects;
-
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -16,14 +14,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Notes::Id).string().not_null().primary_key())
                     .col(ColumnDef::new(Notes::Title).string().not_null())
                     .col(ColumnDef::new(Notes::Text).string().not_null())
-                    .col(ColumnDef::new(Projects::OrganisationId).string().not_null())
                     .col(ColumnDef::new(Notes::ProjectId).string().not_null())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("fk-note-project_id")
-                            .from(Notes::Table, Notes::ProjectId)
-                            .to(Projects::Table, Projects::Id),
-                    )
                     .to_owned(),
             )
             .await

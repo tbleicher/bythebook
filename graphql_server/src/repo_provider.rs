@@ -6,7 +6,7 @@ use domain::interfaces::{
     NoteRepository, OrganisationRepository, ProjectRepository, RepoProvider, UserRepository,
 };
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct RepoProviderGraphql {
     pub db: Database,
 }

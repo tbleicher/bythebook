@@ -1,7 +1,5 @@
 use sea_orm_migration::prelude::*;
 
-use super::m20221117_000001_create_organisations_table::Organisations;
-
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -27,13 +25,9 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Users::Deleted).boolean().default(false))
                     .col(ColumnDef::new(Users::Name).string().not_null())
+                    .col(ColumnDef::new(Users::PasswordHash).string().not_null())
                     .col(ColumnDef::new(Users::OrganisationId).string().not_null())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("fk-user-organisation_id")
-                            .from(Users::Table, Users::OrganisationId)
-                            .to(Organisations::Table, Organisations::Id),
-                    )
+                    .col(ColumnDef::new(Users::VerifyToken).string().not_null())
                     .to_owned(),
             )
             .await
@@ -55,4 +49,6 @@ enum Users {
     EmailVerified,
     Name,
     OrganisationId,
+    PasswordHash,
+    VerifyToken,
 }

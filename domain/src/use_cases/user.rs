@@ -1,8 +1,19 @@
 use crate::{
-    entities::user::{NewUserDTO, User},
+    entities::user::{AuthUser, NewUserDTO, User},
     errors::RepositoryError,
     interfaces::RepoProvider,
 };
+use argonautica::Hasher;
+use nanoid::nanoid;
+
+pub fn hash_password(password: &str, hash_secret: String) -> String {
+    let mut hasher = Hasher::default();
+    hasher
+        .with_password(password)
+        .with_secret_key(hash_secret)
+        .hash()
+        .unwrap()
+}
 
 pub struct UserUseCases {}
 
@@ -12,9 +23,40 @@ impl UserUseCases {
         dto: NewUserDTO,
     ) -> Result<User, RepositoryError> {
         let repo = repo_provider.get_user_repo();
-        let result = repo.create(dto).await;
 
-        result
+        let user_tmp = AuthUser {
+            id: nanoid!(10, &nanoid::alphabet::SAFE),
+            deleted: false,
+            email: dto.email.to_string(),
+            email_verified: false,
+            name: dto.name.to_string(),
+            organisation_id: dto.organisation_id.to_string(),
+            password_hash: hash_password("password", "secret".to_string()), // XXX
+            verify_token: nanoid!(20, &nanoid::alphabet::SAFE),
+        };
+
+        let create_result = repo.create(user_tmp).await;
+        let user = match create_result {
+            Ok(user) => user,
+            Err(error) => return Err(RepositoryError::new(&error.to_string())),
+        };
+
+        // TODO: send user email
+
+        Ok(user)
+    }
+
+    pub async fn get_auth_user(
+        repo_provider: &impl RepoProvider,
+        email: String,
+    ) -> Result<AuthUser, RepositoryError> {
+        let repo = repo_provider.get_user_repo();
+        let user_option = repo.find_auth_user(email).await?;
+
+        match user_option {
+            Some(user) => Ok(user),
+            None => return Err(RepositoryError::new("user not found")),
+        }
     }
 
     pub async fn delete_user(
@@ -22,9 +64,7 @@ impl UserUseCases {
         id: String,
     ) -> Result<User, RepositoryError> {
         let repo = repo_provider.get_user_repo();
-        let result = repo.delete_by_id(id).await;
-
-        result
+        repo.delete_by_id(id).await
     }
 
     pub async fn get_user_by_id(

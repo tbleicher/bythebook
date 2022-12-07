@@ -4,44 +4,21 @@ use domain::entities::organisation::Organisation;
 use domain::errors::RepositoryError;
 use domain::interfaces::OrganisationRepository;
 
-use chrono::prelude::*;
-use nanoid::nanoid;
 use sea_orm::*;
 
-fn convert_to_entity(model: organisation::Model) -> Organisation {
-    Organisation {
-        id: model.id.to_string(),
-        name: model.name.to_string(),
-        active: model.active.to_owned(),
-        admin_id: model.admin_id.to_string(),
-        created_at: model.created_at.clone(),
-        deleted: model.deleted.to_owned(),
-    }
-}
 pub struct OrganisationRepositorySql<'a> {
     pub db: &'a DbConn,
 }
 
 #[async_trait]
 impl OrganisationRepository for OrganisationRepositorySql<'_> {
-    async fn create(
-        &self,
-        name: String,
-        admin_id: String,
-    ) -> Result<Organisation, RepositoryError> {
-        let new_organisation = organisation::ActiveModel {
-            id: Set(nanoid!(10, &nanoid::alphabet::SAFE)),
-            active: Set(false),
-            admin_id: Set(admin_id.to_owned()),
-            deleted: Set(false),
-            created_at: Set(Utc::now()),
-            name: Set(name.to_owned()),
-        };
+    async fn create(&self, org: Organisation) -> Result<Organisation, RepositoryError> {
+        let new_organisation = organisation::ActiveModel::from(org);
 
         let insert_result = new_organisation.insert(self.db).await;
 
         match insert_result {
-            Ok(model) => Ok(convert_to_entity(model)),
+            Ok(model) => Ok(model.into()),
             Err(error) => Err(RepositoryError::new(&format!("DB error: {:?}", error))),
         }
     }
@@ -57,21 +34,13 @@ impl OrganisationRepository for OrganisationRepositorySql<'_> {
             },
         };
 
-        let update_result = organisation::ActiveModel {
-            id: Set(org.id.to_owned()),
-            name: Set(org.name.to_owned()),
-            active: Set(false),
-            admin_id: Set(org.admin_id.to_owned()),
-            created_at: Set(org.created_at),
-            deleted: Set(true),
-        }
-        .update(self.db)
-        .await;
+        let updated = Organisation {
+            active: false,
+            deleted: true,
+            ..org.into()
+        };
 
-        match update_result {
-            Ok(model) => Ok(convert_to_entity(model)),
-            Err(error) => return Err(RepositoryError::new(&format!("DB error: {:?}", error))),
-        }
+        self.update(updated).await
     }
 
     async fn find_one_by_id(&self, id: String) -> Result<Option<Organisation>, RepositoryError> {
@@ -79,7 +48,7 @@ impl OrganisationRepository for OrganisationRepositorySql<'_> {
 
         match record {
             Ok(model_or_none) => match model_or_none {
-                Some(model) => Ok(Some(convert_to_entity(model))),
+                Some(model) => Ok(Some(model.into())),
 
                 None => Ok(None),
             },
@@ -91,18 +60,17 @@ impl OrganisationRepository for OrganisationRepositorySql<'_> {
         let organisations_list = organisation::Entity::find().all(self.db).await;
 
         match organisations_list {
-            Ok(models) => Ok(models
-                .iter()
-                .map(|model| convert_to_entity(model.clone()))
-                .collect()),
+            Ok(models) => Ok(models.iter().map(|model| model.clone().into()).collect()),
             Err(error) => Err(RepositoryError::new(&format!("DB error: {:?}", error))),
         }
     }
 
     async fn update(&self, data: Organisation) -> Result<Organisation, RepositoryError> {
-        let record = organisation::Entity::find_by_id(data.id).one(self.db).await;
+        let record = organisation::Entity::find_by_id(data.id.clone())
+            .one(self.db)
+            .await;
 
-        let current = match record {
+        let _existing = match record {
             Ok(model_or_none) => match model_or_none {
                 Some(model) => model,
                 None => return Err(RepositoryError::new("DB error: entity not found")),
@@ -110,19 +78,10 @@ impl OrganisationRepository for OrganisationRepositorySql<'_> {
             Err(error) => return Err(RepositoryError::new(&format!("DB error: {:?}", error))),
         };
 
-        let update_result = organisation::ActiveModel {
-            id: Set(current.id.to_owned()),
-            name: Set(data.name.to_owned()),
-            active: Set(data.active.to_owned()),
-            admin_id: Set(data.admin_id.to_owned()),
-            created_at: Set(data.created_at.to_owned()),
-            deleted: Set(data.deleted.to_owned()),
-        }
-        .update(self.db)
-        .await;
+        let update_result = organisation::ActiveModel::from(data).update(self.db).await;
 
         match update_result {
-            Ok(model) => Ok(convert_to_entity(model)),
+            Ok(model) => Ok(model.into()),
             Err(error) => return Err(RepositoryError::new(&format!("DB error: {:?}", error))),
         }
     }

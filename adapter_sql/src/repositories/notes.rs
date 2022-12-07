@@ -11,7 +11,6 @@ fn convert_to_entity(model: note::Model) -> Note {
         id: model.id.to_string(),
         title: model.title.to_string(),
         text: model.text.to_string(),
-        organisation_id: model.organisation_id.to_string(),
         project_id: model.project_id.to_string(),
     }
 }
@@ -27,7 +26,6 @@ impl NoteRepository for NoteRepositorySql<'_> {
             id: Set(nanoid!(10, &nanoid::alphabet::SAFE)),
             title: Set(dto.title.to_owned()),
             text: Set(dto.text.to_owned()),
-            organisation_id: Set(dto.organisation_id.to_owned()),
             project_id: Set(dto.project_id.to_owned()),
         };
 
@@ -141,7 +139,6 @@ impl UnusedFunctions {
             id: Set(nanoid!(10, &nanoid::alphabet::SAFE)),
             title: Set(form_data.title.to_owned()),
             text: Set(form_data.text.to_owned()),
-            organisation_id: Set(form_data.organisation_id.to_owned()),
             project_id: Set(form_data.project_id.to_owned()),
         };
 
@@ -163,7 +160,6 @@ impl UnusedFunctions {
             id: note.id,
             title: Set(form_data.title.to_owned()),
             text: Set(form_data.text.to_owned()),
-            organisation_id: Set(form_data.organisation_id.to_owned()),
             project_id: Set(form_data.project_id.to_owned()),
         }
         .update(db)

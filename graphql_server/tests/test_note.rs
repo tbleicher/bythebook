@@ -10,17 +10,17 @@ use common::note::{
 };
 use common::organisation::OrganisationFixture;
 use common::project::ProjectFixture;
-use common::{execute_query, get_test_app};
+use common::{execute_query, get_test_app_graphql};
 
 #[actix_web::test]
 async fn test_create_note() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
     let project = ProjectFixture::new(&org.id).execute(&app).await;
 
-    let query = get_create_note_query("Test note", "test description", &org.id, &project.id);
+    let query = get_create_note_query("Test note", "test description", &project.id);
     let body_as_string = execute_query(app, query).await;
     let create_note_response: CreateNoteResponse = serde_json::from_str(&body_as_string).unwrap();
 
@@ -30,7 +30,6 @@ async fn test_create_note() {
                 "title": "Test note",
                 "text": "test description",
                 "project": { "id": project.id },
-                "organisationId": org.id
             }
         }
     });
@@ -40,12 +39,12 @@ async fn test_create_note() {
 
 #[actix_web::test]
 async fn test_delete_note() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
     let project = ProjectFixture::new(&org.id).execute(&app).await;
-    let note = NoteFixture::new(&org.id, &project.id).execute(&app).await;
+    let note = NoteFixture::new(&project.id).execute(&app).await;
 
     let query = get_delete_note_query(&note.id);
     let body_as_string = execute_query(app, query).await;
@@ -63,12 +62,12 @@ async fn test_delete_note() {
 
 #[actix_web::test]
 async fn test_get_note_existing() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
     let project = ProjectFixture::new(&org.id).execute(&app).await;
-    let note = NoteFixture::new(&org.id, &project.id).execute(&app).await;
+    let note = NoteFixture::new(&project.id).execute(&app).await;
 
     let query = get_get_note_query(&note.id);
     let body_as_string = execute_query(app, query).await;
@@ -79,7 +78,6 @@ async fn test_get_note_existing() {
             "note": {
                 "title": "Note title",
                 "text": "note text",
-                "organisationId": org.id,
                 "project": {
                     "id": project.id
                 }
@@ -92,7 +90,7 @@ async fn test_get_note_existing() {
 
 #[actix_web::test]
 async fn test_list_notes_empty() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
 
     let query = get_list_notes_query();
     let body_as_string = execute_query(app, query).await;
@@ -109,13 +107,13 @@ async fn test_list_notes_empty() {
 
 #[actix_web::test]
 async fn test_list_notes_multiple() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
     let project = ProjectFixture::new(&org.id).execute(&app).await;
-    let _note1 = NoteFixture::new(&org.id, &project.id).execute(&app).await;
-    let _note2 = NoteFixture::new(&org.id, &project.id)
+    let _note1 = NoteFixture::new(&project.id).execute(&app).await;
+    let _note2 = NoteFixture::new(&project.id)
         .set_title("Second note")
         .execute(&app)
         .await;

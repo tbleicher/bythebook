@@ -10,11 +10,11 @@ use common::project::{
     get_list_projects_query, CreateProjectResponse, DeleteProjectResponse, GetProjectResponse,
     ListProjectsResponse, ProjectFixture,
 };
-use common::{execute_query, get_test_app};
+use common::{execute_query, get_test_app_graphql};
 
 #[actix_web::test]
 async fn test_create_project() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
@@ -38,7 +38,7 @@ async fn test_create_project() {
 
 #[actix_web::test]
 async fn test_delete_project() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
@@ -62,7 +62,7 @@ async fn test_delete_project() {
 
 #[actix_web::test]
 async fn test_get_project_existing() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
@@ -87,7 +87,7 @@ async fn test_get_project_existing() {
 
 #[actix_web::test]
 async fn test_get_project_not_existing() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
 
     let query = get_get_project_query("abc");
     let body_as_string = execute_query(&app, query).await;
@@ -104,7 +104,7 @@ async fn test_get_project_not_existing() {
 
 #[actix_web::test]
 async fn test_list_projects_empty() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
 
     let query = get_list_projects_query();
     let body_as_string = execute_query(&app, query).await;
@@ -121,7 +121,7 @@ async fn test_list_projects_empty() {
 
 #[actix_web::test]
 async fn test_list_projects_multiple() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;

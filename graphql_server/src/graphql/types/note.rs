@@ -11,7 +11,6 @@ pub struct CreateNoteInput {
     pub title: String,
     pub text: String,
     pub project_id: String,
-    pub organisation_id: String,
 }
 
 impl CreateNoteInput {
@@ -19,7 +18,6 @@ impl CreateNoteInput {
         NewNoteDTO {
             title: self.title,
             text: self.text,
-            organisation_id: self.organisation_id,
             project_id: self.project_id,
         }
     }
@@ -35,14 +33,12 @@ pub struct Note {
     pub title: String,
     pub text: String,
     pub project_id: String,
-    pub organisation_id: String,
 }
 
 impl Note {
     pub fn from_entity(entity: &NoteEntity) -> Note {
         Note {
             id: entity.id.clone(),
-            organisation_id: entity.organisation_id.clone(),
             project_id: entity.project_id.clone(),
             text: entity.text.clone(),
             title: entity.title.clone(),
@@ -85,9 +81,5 @@ impl Note {
         //     Err(_) => break,
         // };
         // fut.await;
-    }
-
-    async fn organisation_id(&self) -> String {
-        self.organisation_id.to_string()
     }
 }

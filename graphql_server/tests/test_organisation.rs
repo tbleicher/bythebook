@@ -8,11 +8,11 @@ use common::organisation::{
     get_create_organisation_query, get_delete_organisation_query, CreateOrganisationResponse,
     DeleteOrganisationResponse, OrganisationFixture,
 };
-use common::{execute_query, get_test_app};
+use common::{execute_query, get_test_app_graphql};
 
 #[actix_web::test]
 async fn test_create_organisation() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
 
     let query_string =
         get_create_organisation_query("Example Inc", "admin@example.com", "Admin User");
@@ -23,12 +23,12 @@ async fn test_create_organisation() {
         "data": {
             "createOrganisation": {
                 "name": "Example Inc",
-                "active": true,
+                "active": false,
                 "deleted": false,
                 "admin": {
                     "deleted": false,
                     "email": "admin@example.com",
-                    "emailVerified": true,
+                    "emailVerified": false,
                     "name": "Admin User",
                 }
 
@@ -40,7 +40,7 @@ async fn test_create_organisation() {
 
 #[actix_web::test]
 async fn test_delete_organisation() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("ACME", "acme@example.com")
         .execute(&app)
         .await;

@@ -4,11 +4,11 @@ use serde_json::json;
 mod common;
 use common::organisation::OrganisationFixture;
 use common::user::{get_create_user_query, CreateUserResponse};
-use common::{execute_query, get_test_app};
+use common::{execute_query, get_test_app_graphql};
 
 #[actix_web::test]
 async fn test_create_user() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;
@@ -30,7 +30,7 @@ async fn test_create_user() {
 
 #[actix_web::test]
 async fn test_create_user_unique_email() {
-    let app = get_test_app().await;
+    let app = get_test_app_graphql().await;
     let org = OrganisationFixture::new("Test Org", "admin@example.com")
         .execute(&app)
         .await;

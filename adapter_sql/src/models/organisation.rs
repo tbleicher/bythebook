@@ -1,4 +1,5 @@
-use sea_orm::{entity::prelude::*, DeleteMany};
+use domain::entities::organisation::Organisation;
+use sea_orm::{entity::prelude::*, DeleteMany, Set};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
@@ -28,5 +29,31 @@ impl Entity {
         Self::delete_many()
             .filter(Column::Id.eq(id))
             .filter(Column::Deleted.eq(true))
+    }
+}
+
+impl From<Organisation> for ActiveModel {
+    fn from(org: Organisation) -> Self {
+        ActiveModel {
+            active: Set(org.active),
+            admin_id: Set(org.admin_id),
+            created_at: Set(org.created_at),
+            deleted: Set(org.deleted),
+            id: Set(org.id),
+            name: Set(org.name),
+        }
+    }
+}
+
+impl Into<Organisation> for Model {
+    fn into(self) -> Organisation {
+        Organisation {
+            id: self.id,
+            name: self.name,
+            active: self.active,
+            admin_id: self.admin_id,
+            created_at: self.created_at,
+            deleted: self.deleted,
+        }
     }
 }

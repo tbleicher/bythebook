@@ -14,10 +14,17 @@ actix-http = "3.2.2"
 actix-web = { version = "4.2.1", default-features = false, features = [
   "macros",
 ] }
+actix-web-httpauth = "0.8.0"
 chrono = "0.4.23"
 dotenvy = "0.15.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.88"
+argonautica = "0.2.0"
+hmac = "0.12.1"
+jwt = "0.16.0"
+nanoid = "0.4.0"
+sha2 = "0.10.6"
+futures-util = "0.3.25"
 
 adapter_sql = { path = "../adapter_sql" }
 domain = { path = "../domain" }
