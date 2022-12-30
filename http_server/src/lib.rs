@@ -12,6 +12,7 @@ use migration::{Migrator, MigratorTrait};
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
 
+use crate::auth::refresh_token::refresh_token;
 use crate::auth::signin::signin;
 
 pub async fn index_graphql(schema: web::Data<AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
@@ -50,7 +51,10 @@ pub async fn main() -> std::io::Result<()> {
             .app_data(Data::new(config.clone()))
             .app_data(Data::new(repo_provider.clone()))
             .app_data(Data::new(schema.clone()))
-            .service(web::resource("/signin").route(web::get().to(signin)))
+            .service(web::resource("/auth/refresh_token").route(web::post().to(refresh_token)))
+            .service(web::resource("/auth/refresh_token/").route(web::post().to(refresh_token)))
+            .service(web::resource("/auth/signin").route(web::get().to(signin)))
+            .service(web::resource("/auth/signin/").route(web::get().to(signin)))
             .service(web::resource("/").guard(guard::Post()).to(index_graphql))
             .service(web::resource("/").guard(guard::Get()).to(index_graphiql))
     })

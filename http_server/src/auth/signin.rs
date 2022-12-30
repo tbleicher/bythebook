@@ -6,8 +6,14 @@ use actix_web_httpauth::extractors::basic::BasicAuth;
 use graphql_schema::repo_provider::RepoProviderGraphql;
 
 use domain::use_cases::UserUseCases;
+use serde::Serialize;
 
 use super::password::verify_password;
+
+#[derive(Serialize)]
+struct SigninResponse {
+    token: String,
+}
 
 pub async fn signin(
     repo_provider: Data<RepoProviderGraphql>,
@@ -37,7 +43,7 @@ pub async fn signin(
 
     if is_valid {
         let token_str = generate_user_token(user, config.jwt_signing_secret.to_string());
-        HttpResponse::Ok().json(token_str)
+        HttpResponse::Ok().json(SigninResponse { token: token_str })
     } else {
         HttpResponse::Unauthorized().json("Incorrect username or password")
     }
