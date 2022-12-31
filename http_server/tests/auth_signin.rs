@@ -7,7 +7,8 @@ use crate::common::execute_post_request;
 
 #[derive(Deserialize, Serialize)]
 struct TokenResponse {
-    token: String,
+    access_token: String,
+    refresh_token: String,
 }
 
 #[actix_web::test]
@@ -20,5 +21,5 @@ async fn test_get_user_token() {
     let response_string = execute_post_request(&app, "/get_token", request).await;
 
     let actual: TokenResponse = serde_json::from_str(&response_string).unwrap();
-    assert!(actual.token.starts_with("ey"));
+    assert!(actual.access_token.starts_with("ey"));
 }

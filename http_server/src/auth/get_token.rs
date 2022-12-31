@@ -1,4 +1,3 @@
-use crate::auth::token::generate_user_token;
 use crate::config::AppConfig;
 use actix_web::web::{Data, Json};
 use actix_web::{HttpResponse, Responder};
@@ -7,6 +6,7 @@ use graphql_schema::repo_provider::RepoProviderGraphql;
 use serde::{Deserialize, Serialize};
 
 use super::password::verify_password;
+use super::token::{generate_access_token, generate_refresh_token};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GetTokenRequest {
@@ -16,7 +16,8 @@ pub struct GetTokenRequest {
 
 #[derive(Deserialize, Serialize)]
 pub struct TokenResponse {
-    token: String,
+    access_token: String,
+    refresh_token: String,
 }
 
 pub async fn get_token(
@@ -39,8 +40,14 @@ pub async fn get_token(
     );
 
     if is_valid {
-        let token = generate_user_token(user, config.jwt_signing_secret.to_string());
-        HttpResponse::Ok().json(TokenResponse { token })
+        let access_token =
+            generate_access_token(user.clone(), config.jwt_signing_secret.to_string());
+        let refresh_token = generate_refresh_token(user, config.jwt_signing_secret.to_string());
+
+        HttpResponse::Ok().json(TokenResponse {
+            access_token,
+            refresh_token,
+        })
     } else {
         HttpResponse::Unauthorized().json("Incorrect username or password")
     }
