@@ -12,9 +12,7 @@ impl NoteUseCases {
         dto: NewNoteDTO,
     ) -> Result<Note, RepositoryError> {
         let repo = repo_provider.get_note_repo();
-        let result = repo.create(dto).await;
-
-        result
+        repo.create(dto).await
     }
 
     pub async fn delete_note(
@@ -22,9 +20,7 @@ impl NoteUseCases {
         id: String,
     ) -> Result<Note, RepositoryError> {
         let repo = repo_provider.get_note_repo();
-        let result = repo.delete_by_id(id).await;
-
-        result
+        repo.delete_by_id(id).await
     }
 
     pub async fn get_note_by_id(

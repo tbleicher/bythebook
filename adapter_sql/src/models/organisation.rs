@@ -45,6 +45,8 @@ impl From<Organisation> for ActiveModel {
     }
 }
 
+#[allow(clippy::from_over_into)]
+
 impl Into<Organisation> for Model {
     fn into(self) -> Organisation {
         Organisation {

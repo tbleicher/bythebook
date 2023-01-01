@@ -15,7 +15,7 @@ impl NotesQuery {
         let result = repo
             .list()
             .await
-            .map(|v| v.iter().map(|n| Note::from_entity(n)).collect())
+            .map(|v| v.iter().map(Note::from_entity).collect())
             .map_err(|e| e.to_string())?;
 
         Ok(result)

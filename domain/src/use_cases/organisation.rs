@@ -79,8 +79,6 @@ impl OrganisationUseCases {
 
         // TODO: check permissions
         let _delete_users = user_repo.delete_by_organisation_id(id.clone()).await;
-        let result = repo.delete_by_id(id).await;
-
-        result
+        repo.delete_by_id(id).await
     }
 }

@@ -13,7 +13,7 @@ impl CreateUserInput {
         NewUserDTO {
             name: self.name,
             email: self.email,
-            organisation_id: self.organisation_id.to_string(),
+            organisation_id: self.organisation_id,
         }
     }
 }
@@ -36,9 +36,9 @@ impl User {
     pub fn from_entity(entity: &UserEntity) -> User {
         User {
             id: entity.id.clone(),
-            deleted: entity.deleted.clone(),
+            deleted: entity.deleted,
             email: entity.email.clone(),
-            email_verified: entity.email_verified.clone(),
+            email_verified: entity.email_verified,
             name: entity.name.clone(),
             organisation_id: entity.organisation_id.clone(),
         }

@@ -12,9 +12,7 @@ impl ProjectUseCases {
         dto: NewProjectDTO,
     ) -> Result<Project, RepositoryError> {
         let repo = repo_provider.get_project_repo();
-        let result = repo.create(dto).await;
-
-        result
+        repo.create(dto).await
     }
 
     pub async fn delete_project(
@@ -22,9 +20,7 @@ impl ProjectUseCases {
         id: String,
     ) -> Result<Project, RepositoryError> {
         let repo = repo_provider.get_project_repo();
-        let result = repo.delete_by_id(id).await;
-
-        result
+        repo.delete_by_id(id).await
     }
 
     pub async fn get_project_by_id(

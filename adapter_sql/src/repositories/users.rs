@@ -15,7 +15,7 @@ fn convert_to_entity(model: user::Model) -> User {
         email: model.email.to_string(),
         email_verified: model.email_verified.to_owned(),
         name: model.name.to_string(),
-        organisation_id: model.organisation_id.to_string(),
+        organisation_id: model.organisation_id,
     }
 }
 
@@ -28,7 +28,7 @@ fn convert_to_auth_user(model: user::Model) -> AuthUser {
         name: model.name.to_string(),
         organisation_id: model.organisation_id.to_string(),
         password_hash: model.password_hash.to_string(),
-        verify_token: model.verify_token.to_string(),
+        verify_token: model.verify_token,
     }
 }
 
@@ -149,7 +149,7 @@ impl UserRepository for UserRepositorySql<'_> {
         let update_result = user::ActiveModel::from(data).update(self.db).await;
 
         match update_result {
-            Ok(model) => Ok(convert_to_entity(model.clone())),
+            Ok(model) => Ok(convert_to_entity(model)),
             Err(error) => Err(RepositoryError::new(&error.to_string())),
         }
     }

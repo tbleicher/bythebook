@@ -55,7 +55,7 @@ impl UserUseCases {
 
         match user_option {
             Some(user) => Ok(user),
-            None => return Err(RepositoryError::new("user not found")),
+            None => Err(RepositoryError::new("user not found")),
         }
     }
 

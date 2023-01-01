@@ -16,7 +16,7 @@ impl ProjectsQuery {
 
         match list_result {
             Ok(entities) => {
-                let graphql_projects = entities.iter().map(|n| Project::from_entity(n)).collect();
+                let graphql_projects = entities.iter().map(Project::from_entity).collect();
                 Ok(graphql_projects)
             }
             Err(error) => Err(Error::new(error.to_string())),

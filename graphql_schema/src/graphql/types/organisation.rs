@@ -45,10 +45,10 @@ impl Organisation {
         Organisation {
             id: entity.id.clone(),
             name: entity.name.clone(),
-            active: entity.active.clone(),
+            active: entity.active,
             admin_id: entity.admin_id.clone(),
-            created_at: entity.created_at.clone(),
-            deleted: entity.deleted.clone(),
+            created_at: entity.created_at,
+            deleted: entity.deleted,
         }
     }
 }

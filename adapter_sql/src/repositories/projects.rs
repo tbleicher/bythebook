@@ -11,7 +11,7 @@ fn convert_to_entity(model: project::Model) -> Project {
         id: model.id.to_string(),
         title: model.title.to_string(),
         description: model.description.to_string(),
-        organisation_id: model.organisation_id.to_string(),
+        organisation_id: model.organisation_id,
     }
 }
 pub struct ProjectRepositorySql<'a> {
@@ -94,7 +94,7 @@ impl ProjectRepositorySql<'_> {
                         id: model.id.to_string(),
                         title: model.title.to_string(),
                         description: model.description.to_string(),
-                        organisation_id: model.organisation_id.to_string(),
+                        organisation_id: model.organisation_id,
                     };
                     Ok(Some(proj))
                 }
@@ -132,7 +132,7 @@ impl ProjectRepositorySql<'_> {
             organisation_id: Set(dto.organisation_id.to_owned()),
         };
 
-        Ok(new_project.insert(db).await?)
+        new_project.insert(db).await
     }
 
     pub async fn update_project_by_id(
@@ -143,7 +143,7 @@ impl ProjectRepositorySql<'_> {
         let note: project::ActiveModel = project::Entity::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::Custom("Cannot find note.".to_owned()))
+            .ok_or_else(|| DbErr::Custom("Cannot find note.".to_owned()))
             .map(Into::into)?;
 
         project::ActiveModel {
@@ -161,7 +161,7 @@ impl ProjectRepositorySql<'_> {
         let note: project::ActiveModel = project::Entity::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::Custom("Cannot find note.".to_owned()))
+            .ok_or_else(|| DbErr::Custom("Cannot find note.".to_owned()))
             .map(Into::into)?;
 
         note.delete(db).await

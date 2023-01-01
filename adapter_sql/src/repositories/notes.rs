@@ -11,7 +11,7 @@ fn convert_to_entity(model: note::Model) -> Note {
         id: model.id.to_string(),
         title: model.title.to_string(),
         text: model.text.to_string(),
-        project_id: model.project_id.to_string(),
+        project_id: model.project_id,
     }
 }
 
@@ -142,7 +142,7 @@ impl UnusedFunctions {
             project_id: Set(form_data.project_id.to_owned()),
         };
 
-        Ok(new_note.insert(db).await?)
+        new_note.insert(db).await
     }
 
     pub async fn update_note_by_id(
@@ -153,7 +153,7 @@ impl UnusedFunctions {
         let note: note::ActiveModel = note::Entity::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::Custom("Cannot find note.".to_owned()))
+            .ok_or_else(|| DbErr::Custom("Cannot find note.".to_owned()))
             .map(Into::into)?;
 
         note::ActiveModel {
@@ -170,7 +170,7 @@ impl UnusedFunctions {
         let note: note::ActiveModel = note::Entity::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::Custom("Cannot find note.".to_owned()))
+            .ok_or_else(|| DbErr::Custom("Cannot find note.".to_owned()))
             .map(Into::into)?;
 
         note.delete(db).await
