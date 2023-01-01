@@ -4,17 +4,8 @@ use actix_web::{HttpResponse, Responder};
 use actix_web_httpauth::extractors::basic::BasicAuth;
 use graphql_schema::repo_provider::RepoProviderGraphql;
 
-use domain::use_cases::UserUseCases;
-use serde::Serialize;
-
-use super::password::verify_password;
-use super::token::{generate_access_token, generate_refresh_token};
-
-#[derive(Serialize)]
-struct SigninResponse {
-    access_token: String,
-    refresh_token: String,
-}
+use super::token::generate_token_pair;
+use super::verify_user_password::verify_user_password;
 
 pub async fn signin(
     repo_provider: Data<RepoProviderGraphql>,
@@ -27,31 +18,21 @@ pub async fn signin(
         Some(password) => password,
     };
 
-    let user_result =
-        UserUseCases::get_auth_user(repo_provider.get_ref(), credentials.user_id().to_string())
-            .await;
+    let verify_password_result = verify_user_password(
+        repo_provider.get_ref(),
+        credentials.user_id().to_string(),
+        password.to_string(),
+        config.password_hashing_secret.to_string(),
+    )
+    .await;
 
-    let user = match user_result {
-        Ok(user) => user,
-        Err(error) => return HttpResponse::InternalServerError().json(format!("{:?}", error)),
+    let token_pair_result = match verify_password_result {
+        Ok(user) => generate_token_pair(user, config.jwt_signing_secret.to_string()),
+        Err(error) => return HttpResponse::Unauthorized().json(format!("{:?}", error)),
     };
 
-    let is_valid = verify_password(
-        &password,
-        &user.password_hash,
-        config.password_hashing_secret.to_string(),
-    );
-
-    if is_valid {
-        let access_token =
-            generate_access_token(user.clone(), config.jwt_signing_secret.to_string());
-        let refresh_token = generate_refresh_token(user, config.jwt_signing_secret.to_string());
-
-        HttpResponse::Ok().json(SigninResponse {
-            access_token,
-            refresh_token,
-        })
-    } else {
-        HttpResponse::Unauthorized().json("Incorrect username or password")
+    match token_pair_result {
+        Ok(token_pair) => HttpResponse::Ok().json(token_pair),
+        Err(error) => HttpResponse::Unauthorized().json(error.to_string()),
     }
 }
