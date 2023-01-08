@@ -12,8 +12,8 @@ use migration::{Migrator, MigratorTrait};
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
 
-use crate::auth::refresh_token_handler;
 use crate::auth::signin::signin;
+use crate::auth::{refresh_token_handler, AddSessionUser};
 
 fn graphiql_resource(path: &str) -> Resource {
     web::resource(path)
@@ -45,6 +45,7 @@ pub async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::NormalizePath::trim())
+            .wrap(AddSessionUser::new(config.jwt_signing_secret.to_string()))
             .app_data(Config::default().realm("Restricted area"))
             .app_data(Data::new(config.clone()))
             .app_data(Data::new(repo_provider.clone()))

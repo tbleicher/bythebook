@@ -32,3 +32,9 @@ pub struct VerifyEmailDTO {
     pub password: String,
     pub token: String,
 }
+
+#[derive(Debug, Clone)]
+pub struct SessionUser {
+    pub id: String,
+    pub organisation_id: String,
+}

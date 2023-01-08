@@ -2,6 +2,7 @@ use crate::graphql::types::Project;
 use crate::repo_provider::RepoProviderGraphql;
 use async_graphql::Error;
 use async_graphql::{Context, Object, Result};
+use domain::entities::user::SessionUser;
 use domain::use_cases::ProjectUseCases;
 
 #[derive(Default)]
@@ -11,8 +12,9 @@ pub struct ProjectsQuery;
 impl ProjectsQuery {
     async fn projects(&self, ctx: &Context<'_>) -> Result<Vec<Project>> {
         let repo_provider = ctx.data::<RepoProviderGraphql>().unwrap();
+        let user = ctx.data::<SessionUser>().unwrap();
 
-        let list_result = ProjectUseCases::list_projects(repo_provider).await;
+        let list_result = ProjectUseCases::list_projects(repo_provider, user).await;
 
         match list_result {
             Ok(entities) => {

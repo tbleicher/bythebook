@@ -1,5 +1,8 @@
 use crate::{
-    entities::project::{NewProjectDTO, Project},
+    entities::{
+        project::{NewProjectDTO, Project},
+        user::SessionUser,
+    },
     errors::RepositoryError,
     interfaces::RepoProvider,
 };
@@ -45,7 +48,9 @@ impl ProjectUseCases {
 
     pub async fn list_projects(
         repo_provider: &impl RepoProvider,
+        user: &SessionUser,
     ) -> Result<Vec<Project>, RepositoryError> {
+        println!("TODO: list_projecst user: {:?}", user);
         let repo = repo_provider.get_project_repo();
         let list_result = repo.list().await;
 
